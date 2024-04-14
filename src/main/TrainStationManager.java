@@ -26,7 +26,7 @@ public class TrainStationManager {
 	Set<Station> visited = new HashSet();
 	Station currentStation; // Pop from stack work with it and add to set and continue 
 
-
+//hola
 	public TrainStationManager(String station_file) {
 			System.out.println("-------------ONE ITERATION------------------------");
 	       try (BufferedReader br = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
