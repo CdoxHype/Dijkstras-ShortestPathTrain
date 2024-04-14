@@ -1,8 +1,11 @@
 package main;
 
 import data_structures.ArrayList;
+
 import data_structures.HashTableSC;
 import data_structures.SimpleHashFunction;
+import data_structures.LinkedStack;
+import data_structures.HashSet;
 import interfaces.List;
 import interfaces.Map;
 import interfaces.Stack;
@@ -12,44 +15,72 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+
 public class TrainStationManager {
 
 	
-	Map<String,List<Station>> stations = new HashTableSC<>(10,new SimpleHashFunction<>());
+	Map<String,List<Station>> stations = new HashTableSC<>(20,new SimpleHashFunction<String>());
 	
-	Map<String,Station> shortestRoutes =  new HashTableSC<>(10,new SimpleHashFunction<>());
-	Stack<Station> toVisit; //Need to be visited
-	Set<Station> visited;
+	Map<String,Station> shortestRoutes =  new HashTableSC<>(20,new SimpleHashFunction<String>());
+	Stack<Station> toVisit = new LinkedStack<Station>(); //Need to be visited
+	Set<Station> visited = new HashSet();
 	Station currentStation; // Pop from stack work with it and add to set and continue 
 
 
 	public TrainStationManager(String station_file) {
-		List<String[]> data = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
-            String line;
-			br.readLine();//skip header
-            while ((line = br.readLine()) != null) {
-            	String [] parts = line.split(",");
-				String stationName = parts[0];
-				String neighborName = parts[1];
-				int distance = Integer.parseInt(parts[2]);
+			System.out.println("-------------ONE ITERATION------------------------");
+	       try (BufferedReader br = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
+	           String line;
+	           br.readLine();//skip header
+	           while ((line = br.readLine()) != null) {
+	        	   String [] parts = line.split(",");
+	        	   String stationName = parts[0];
+	        	   String neighborName = parts[1];
+	        	   int distance = Integer.parseInt(parts[2]);
+	        	   System.out.print(stationName + ", ");
+	        	   System.out.print(neighborName + ", ");
+	        	   System.out.print(distance + "\n");
+	        	   //if StationName is already in the map, add the neigbor to the list
+	        	   if(stations.containsKey(stationName)){
+	        		   List<Station> existingList = stations.get(stationName);
+	        		   existingList.add(new Station(neighborName,distance));
+	        		   stations.put(stationName,existingList);
+	        		   neighborsConectionChecker(stationName,neighborName,distance);
+	        	   }else{
+	        		   //Create a new list with the neighbor and add it to the map
+	        		   List<Station> neighbors = new ArrayList<Station>();
+	        		   Station newStation = new Station(neighborName,distance);
+	        		   neighbors.add(newStation);
+	        		   stations.put(stationName,neighbors);
+		        	   //Check if neighbor is already connected to the station
+	        		   neighborsConectionChecker(stationName,neighborName,distance);
+	        	   }
 
-				//if StationName is already in the map, add the neigbor to the list
-				if(stations.containsKey(stationName)){
-					stations.get(stationName).add(new Station(neighborName,distance));
-				}else{
-					//Create a new list with the neighbor and add it to the map
-					List<Station> neighbors = new ArrayList<>();
-					neighbors.add(new Station(neighborName,distance));
-					stations.put(stationName,neighbors);
-				}
+	        	   
+	           }	
 
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+	       } catch (IOException e) {
+
+	           e.printStackTrace();
+
+	       }
 	}
 	
+	public void neighborsConectionChecker(String stationName,String neighborName, int distance) {
+	   //Check if neighborn is already connected to the station
+	   if(stations.containsKey(neighborName)) {
+		   List<Station> existingNList = stations.get(neighborName);
+		   Station newConection = new Station(stationName,distance);
+		   existingNList.add(newConection);
+		   stations.put(neighborName,existingNList);
+	   }else { //If the neighborn does not exist then we create a new station to the neighbor and set his neighbor the current station
+		   List<Station> neighbors = new ArrayList<Station>();
+		   Station newStation = new Station(stationName,distance);
+		   neighbors.add(newStation);
+		   stations.put(neighborName,neighbors);
+	   }
+	}
+
 	private void findShortestDistance() {
 				
 	}
@@ -61,11 +92,12 @@ public class TrainStationManager {
 	public Map<String, Double> getTravelTimes() {
 		// 5 minutes per kilometer
 		// 15 min per station
+		return new HashTableSC<String,Double>(1,new SimpleHashFunction<>());
 	}
 
 
 	public Map<String, List<Station>> getStations() {
-		
+		return stations;
 	}
 
 
@@ -75,7 +107,7 @@ public class TrainStationManager {
 
 
 	public Map<String, Station> getShortestRoutes() {
-		
+		return new HashTableSC<String,Station>(1,new SimpleHashFunction<>());
 	}
 
 
