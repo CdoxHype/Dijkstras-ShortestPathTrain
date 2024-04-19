@@ -23,12 +23,10 @@ public class TrainStationManager {
 	
 	Map<String,Station> shortestRoutes =  new HashTableSC<>(20,new SimpleHashFunction<String>());
 	Stack<Station> toVisit = new LinkedStack<Station>(); //Need to be visited
-	Set<Station> visited = new HashSet();
-	Station currentStation; // Pop from stack work with it and add to set and continue 
+	Set<String> visited = new HashSet(); // put is as string
 
-//hola
+
 	public TrainStationManager(String station_file) {
-			System.out.println("-------------ONE ITERATION------------------------");
 	       try (BufferedReader br = new BufferedReader(new FileReader("inputFiles/" + station_file))) {
 	           String line;
 	           br.readLine();//skip header
@@ -37,9 +35,6 @@ public class TrainStationManager {
 	        	   String stationName = parts[0];
 	        	   String neighborName = parts[1];
 	        	   int distance = Integer.parseInt(parts[2]);
-	        	   System.out.print(stationName + ", ");
-	        	   System.out.print(neighborName + ", ");
-	        	   System.out.print(distance + "\n");
 	        	   //if StationName is already in the map, add the neigbor to the list
 	        	   if(stations.containsKey(stationName)){
 	        		   List<Station> existingList = stations.get(stationName);
@@ -64,6 +59,15 @@ public class TrainStationManager {
 	           e.printStackTrace();
 
 	       }
+	       
+	       // Call setInitialDistances to initialize shortestRoutes map
+	       setInitialDistances();
+	       
+	       // Push the starting station onto the toVisit stack
+	       toVisit.push(new Station("Westside", 0));
+	       
+	       // Now, you can call findShortestDistance method
+	       findShortestDistance();
 	}
 	
 	public void neighborsConectionChecker(String stationName,String neighborName, int distance) {
@@ -81,12 +85,70 @@ public class TrainStationManager {
 	   }
 	}
 
-	private void findShortestDistance() {
-				
+	private void findShortestDistance() {	    
+	    
+	    while(!toVisit.isEmpty() || visited.size() != stations.size()) {
+		    Station currentStation = toVisit.pop();
+		    visited.add(currentStation.getCityName());
+		    //lets access his neighborns
+		    List<Station> currentNei = stations.get(currentStation.getCityName());
+		    
+		    //lets check what neighborns we need to add to the toVisit list
+		    for(int i = 0; i < currentNei.size(); i++) {
+		    	if(!visited.isMember(currentNei.get(i).getCityName())) { //If the station is not in the visited set we add it to the stack toVisit
+		    		sortStack(currentNei.get(i),toVisit); // Add and sort at the same time
+		    	}
+		    }
+		    
+		    for(Station stat : currentNei) { // iter the neighbors and do the calc for each one 
+		    	Station shortestStation = shortestRoutes.get(currentStation.getCityName());
+		    	int newDistance = stat.getDistance() + shortestStation.getDistance();
+		    	
+		    	if(newDistance < shortestRoutes.get(stat.getCityName()).getDistance()) { //If is less we change it in the shortestMap
+		    		shortestRoutes.get(stat.getCityName()).setDistance(newDistance); // set the distance
+		    		shortestRoutes.get(stat.getCityName()).setCityName(currentStation.getCityName());// set the name which from we access this 
+		    	}	    	
+		    }   
+		    
+	    }	    
+	}
+	
+	public void setInitialDistances() {
+	    List<String> listOfStations = stations.getKeys();
+	    int initialDistance = Integer.MAX_VALUE;
+	    
+	    // Initialize shortestRoutes map with default distances
+	    for (String station : listOfStations) {
+	        shortestRoutes.put(station, new Station("Westside", initialDistance));
+	    }
+	    
+	    // Initialize the distance for "Westside" to 0
+	    shortestRoutes.put("Westside", new Station("Westside", 0));
 	}
 
+
+	//Also add the station to the stack :)
 	public void sortStack(Station station, Stack<Station> stackToSort) {
-		
+	    Stack<Station> temp = new LinkedStack<>();
+
+	    // Edge case: if stackToSort is empty, just push station onto it
+	    if (stackToSort.isEmpty()) {
+	        stackToSort.push(station);
+	        return; // Exit the method
+	    }
+
+	    // Move elements shorter distance to temp stack
+	    while (!stackToSort.isEmpty() && station.getDistance() > stackToSort.top().getDistance()) {
+	        temp.push(stackToSort.pop());
+	    }
+
+	    // Add the given station to the correct place in stackToSort
+	    stackToSort.push(station);
+
+	    // Push temp values back to stackToSort
+	    while (!temp.isEmpty()) {
+	        stackToSort.push(temp.pop());
+	    }
 	}
 	
 	public Map<String, Double> getTravelTimes() {
@@ -102,17 +164,17 @@ public class TrainStationManager {
 
 
 	public void setStations(Map<String, List<Station>> cities) {
-		
+		stations = cities;
 	}
 
 
 	public Map<String, Station> getShortestRoutes() {
-		return new HashTableSC<String,Station>(1,new SimpleHashFunction<>());
+		return shortestRoutes;
 	}
 
 
 	public void setShortestRoutes(Map<String, Station> shortestRoutes) {
-		
+		this.shortestRoutes = shortestRoutes;
 	}
 	
 	/**
