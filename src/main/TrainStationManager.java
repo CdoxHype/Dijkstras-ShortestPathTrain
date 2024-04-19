@@ -152,9 +152,31 @@ public class TrainStationManager {
 	}
 	
 	public Map<String, Double> getTravelTimes() {
-		// 5 minutes per kilometer
-		// 15 min per station
-		return new HashTableSC<String,Double>(1,new SimpleHashFunction<>());
+	    Map<String, Double> travelTimes = new HashTableSC<>(20, new SimpleHashFunction<>());
+
+	    // Get the list of stations
+	    List<String> stationNames = stations.getKeys();
+
+	    // Iter through each station
+	    for (String stationName : stationNames) {
+	        // Get the shortest route to the current station
+	        Station shortestRoute = shortestRoutes.get(stationName);
+
+	        // Calculate the travel time from Westside to the current station
+	        double distance = shortestRoute.getDistance();
+	        double timeToReachStation = distance * 2.5; // 2.5 minutes per km
+
+	        // Add 15 minutes for each station between Westside and the current station
+	        Station currentStation = shortestRoute;
+	        while (!currentStation.getCityName().equals("Westside")) {
+	            timeToReachStation += 15; // 15 minutes per station
+	            currentStation = shortestRoutes.get(currentStation.getCityName());
+	        }
+
+	        travelTimes.put(stationName, timeToReachStation);
+	    }
+
+	    return travelTimes;
 	}
 
 
