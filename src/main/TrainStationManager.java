@@ -209,8 +209,36 @@ public class TrainStationManager {
 	 * @return (String) String representation of the path taken to reach stationName.
 	 */
 	public String traceRoute(String stationName) {
-		// Remove if you implement the method, otherwise LEAVE ALONE
-		throw new UnsupportedOperationException();
+		//The route for westside is always itself :)
+		if(stationName == "Westside") {
+			return stationName;
+		}
+		
+	    // Check if the stationName is valid
+	    if (!shortestRoutes.containsKey(stationName)) {
+	        return "Station not found: " + stationName;
+	    }
+
+	    // Initialize a StringBuilder to construct the route string
+	    StringBuilder routeBuilder = new StringBuilder();
+	    // Start from the destination station
+	    Station currentStation = shortestRoutes.get(stationName);
+	    // Append the destination station name
+	    routeBuilder.insert(0, "->" + stationName);
+	    
+	    // Follow the shortest routes backwards until reaching "Westside"
+	    while (!currentStation.getCityName().equals("Westside")) {
+	        routeBuilder.insert(0, "->" + currentStation.getCityName());
+	        // Move to the previous station
+	        currentStation = shortestRoutes.get(currentStation.getCityName());
+	    }
+
+	    // Append "Westside" to indicate the starting point
+	    routeBuilder.insert(0, "Westside");
+
+	    // Return the constructed route string
+	    return routeBuilder.toString();
 	}
+
 
 }
