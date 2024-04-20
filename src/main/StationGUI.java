@@ -11,7 +11,7 @@ import interfaces.Map;
 /**
  * The TrainStationGUI class creates a graphical user interface for displaying train station schedules.
  */
-public class TrainStationGUI extends JFrame {
+public class StationGUI extends JFrame {
     private TrainStationManager manager;
     private JTextField searchField;
     private JTextArea routeTextArea;
@@ -21,7 +21,7 @@ public class TrainStationGUI extends JFrame {
      *
      * @param manager The TrainStationManager to use for accessing station data.
      */
-    public TrainStationGUI(TrainStationManager manager) {
+    public StationGUI(TrainStationManager manager) {
         super("Train Station Schedule");
         this.manager = manager;
 
@@ -151,6 +151,6 @@ public class TrainStationGUI extends JFrame {
      */
     public static void main(String[] args) {
         TrainStationManager manager = new TrainStationManager("stations.csv");
-        TrainStationGUI gui = new TrainStationGUI(manager);
+        StationGUI gui = new StationGUI(manager);
     }
 }
