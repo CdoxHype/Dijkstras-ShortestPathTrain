@@ -125,7 +125,7 @@ public class StationGUI extends JFrame {
         if (departureTime.equals("Unknown")) {
             return "We are getting out of here :)";
         }
-
+//j
         String[] timeParts = departureTime.split(":");
         int hour = Integer.parseInt(timeParts[0]);
         int minute = Integer.parseInt(timeParts[1].substring(0, 2));
